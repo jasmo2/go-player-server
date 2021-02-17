@@ -2,25 +2,29 @@ package main
 
 import (
 	"encoding/json"
-	"io"
+	"fmt"
 	"os"
 )
 
 // FileSystemPlayerStore stores players in the filesystem.
 type FileSystemPlayerStore struct {
-	database io.Writer
+	database *json.Encoder
 	league   League
 }
 
 // NewFileSystemPlayerStore creates a FileSystemPlayerStore.
-func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
+func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 	file.Seek(0, 0)
-	league, _ := NewLeague(file)
+	league, err := NewLeague(file)
+
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
+	}
 
 	return &FileSystemPlayerStore{
-		database: file,
+		database: json.NewEncoder(&tape{*file}),
 		league:   league,
-	}
+	}, nil
 }
 
 // GetLeague returns the scores of all the players.
@@ -50,6 +54,5 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 		f.league = append(f.league, Player{name, 1})
 	}
 
-	// f.database.Seek(0, 0)
-	json.NewEncoder(f.database).Encode(f.league)
+	f.database.Encode(f.league)
 }
