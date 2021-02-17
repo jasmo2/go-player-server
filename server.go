@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -15,6 +16,12 @@ type PlayerStore interface {
 type PlayerServer struct {
 	store PlayerStore
 	http.Handler
+}
+
+// Player Struct
+type Player struct {
+	Name string
+	Wins int
 }
 
 // NewPlayerServer creates a PlayerServer with routing configured.
@@ -32,6 +39,11 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 }
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	leagueTable := []Player{
+		{"Chris", 20},
+	}
+
+	json.NewEncoder(w).Encode(leagueTable)
 	w.WriteHeader((http.StatusOK))
 }
 
