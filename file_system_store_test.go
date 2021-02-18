@@ -34,7 +34,6 @@ func TestFileSystemStore(t *testing.T) {
 		defer cleanDatabase()
 
 		store, err := NewFileSystemPlayerStore(database)
-
 		assertNoError(t, err)
 		got := store.GetLeague()
 
@@ -92,6 +91,14 @@ func TestFileSystemStore(t *testing.T) {
 		got := store.GetPlayerScore("Pepper")
 		want := 1
 		assertScoreEquals(t, got, want)
+	})
+
+	t.Run("works with empty file", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, "")
+		defer cleanDatabase()
+
+		_, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 	})
 }
 
